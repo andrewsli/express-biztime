@@ -2,11 +2,14 @@
 
 
 const express = require("express");
+const cRoutes = require('./routes/companies');
 
 const app = express();
 const ExpressError = require("./expressError")
 
 app.use(express.json());
+
+app.use('/companies', cRoutes);
 
 
 /** 404 handler */
@@ -23,7 +26,6 @@ app.use((err, req, res, next) => {
 
   return res.json({
     error: err,
-    message: err.message
   });
 });
 
