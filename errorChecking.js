@@ -7,8 +7,16 @@ function checkExists(res, thing){
   }
 }
 
-// function checkInputs(reqBody, args){
-//    return args.every(prop => (reqBody[prop] !== undefined || reqBody[prop] === ""))
-// }
+function checkInputs(reqBody, args){
+  let badInputs = args.some(
+    prop => (reqBody[prop] === undefined || reqBody[prop] === "")
+    );
+  if (badInputs) {
+     throw new ExpressError(
+       "Please make sure you filled in the required fields",
+        400
+        );
+  }
+}
 
-module.exports = { checkExists }
+module.exports = { checkExists, checkInputs }
