@@ -20,12 +20,21 @@ router.get('/', async function(req, res, next){
 // get company by code {company: {code, name, description}}
 router.get('/:code', async function(req, res, next){
   try{
-      const results = await db.query(
+      const companyRes = await db.query(
         `SELECT code, name, description FROM companies
         WHERE code = $1`,[req.params.code]
       );
-      errorChecking.companyNotFound(results)
-      return res.json({company: results.rows[0]})
+      errorChecking.checkExists(companyRes, "Company")
+      const invoiceRes = await db.query(
+        `SELECT id FROM invoices
+        WHERE comp_code = $1`,[req.params.code]
+      )
+
+      const company = companyRes.rows[0];
+      company.invoices = invoiceRes.rows.map(invoice => invoice.id);
+      
+
+      return res.json({company: company})
   } catch(err){
     return next(err);
   }
@@ -60,13 +69,18 @@ router.post('/', async function(req, res, next){
 router.put('/:code', async function(req, res, next){
   try{
     const {name, description} = req.body;
+    if ((name === undefined || name === "")) {
+      throw new ExpressError(
+        "Please make sure you gave a name", 400
+        );
+    }
     const result = await db.query(
       `UPDATE companies SET name=$2, description=$3
       WHERE code=$1
       RETURNING code, name, description`,
       [req.params.code, name, description]
     );
-    errorChecking.companyNotFound(result)
+    errorChecking.checkExists(results, "Company")
     return res.json({company: result.rows[0]});
   } catch(err){
     return next(err);
@@ -80,7 +94,7 @@ router.delete('/:code', async function(req, res, next){
       `DELETE FROM companies WHERE code = $1`,
       [req.params.code]
     );
-    errorChecking.companyNotFound(result)
+    errorChecking.checkExists(result, "Company")
     return res.json({status: "deleted"})
   } catch(err){
     next(err)

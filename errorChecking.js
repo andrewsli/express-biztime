@@ -1,10 +1,14 @@
 const ExpressError = require("./expressError")
 
-//checks if companies/a company was found
-function companyNotFound(res){
+//checks if thing exists in database
+function checkExists(res, thing){
   if (res.rowCount === 0){
-    throw new ExpressError("Company not found", 404)
+    throw new ExpressError(`${thing} not found`, 404);
   }
 }
 
-module.exports = { companyNotFound }
+// function checkInputs(reqBody, args){
+//    return args.every(prop => (reqBody[prop] !== undefined || reqBody[prop] === ""))
+// }
+
+module.exports = { checkExists }
